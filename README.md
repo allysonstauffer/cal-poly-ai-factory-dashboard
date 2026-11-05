@@ -82,6 +82,7 @@ RUNAI_BASE_URL=https://<your-runai-instance>
 RUNAI_CLIENT_ID=<your-client-id>
 RUNAI_CLIENT_SECRET=<your-client-secret>
 RUNAI_VERIFY_TLS=true
+RUNAI_CA_BUNDLE=C:/path/outside/repo/calpoly-ai-cluster-ca.pem   # optional, Cal Poly-issued CA
 ```
 
 `RUNAI_VERIFY_TLS` should remain `true` once the Run:ai certificate is trusted. Do not put real credentials, bearer tokens, internal IP addresses, or sensitive screenshots in this repository.

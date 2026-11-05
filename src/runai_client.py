@@ -19,6 +19,14 @@ class RunaiConfig:
     client_id: str
     client_secret: str
     verify_tls: bool = True
+    ca_bundle: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.ca_bundle and not self.verify_tls:
+            raise RuntimeError(
+                "Conflicting TLS settings: RUNAI_CA_BUNDLE is set but RUNAI_VERIFY_TLS=false. "
+                "Remove RUNAI_VERIFY_TLS=false to verify against the CA bundle."
+            )
 
     @classmethod
     def from_env(cls) -> "RunaiConfig":
@@ -33,12 +41,18 @@ class RunaiConfig:
                 f"Missing environment variables: {', '.join(missing)}. "
                 "Copy .env.example to .env and fill in your values."
             )
+        ca_bundle = os.getenv("RUNAI_CA_BUNDLE", "").strip() or None
+        if ca_bundle:
+            ca_bundle = os.path.expanduser(ca_bundle)
+            if not os.path.isfile(ca_bundle):
+                raise RuntimeError(f"RUNAI_CA_BUNDLE file not found: {ca_bundle}")
         return cls(
             base_url=os.environ["RUNAI_BASE_URL"].rstrip("/"),
             client_id=os.environ["RUNAI_CLIENT_ID"],
             client_secret=os.environ["RUNAI_CLIENT_SECRET"],
             verify_tls=os.getenv("RUNAI_VERIFY_TLS", "true").strip().lower()
             not in ("false", "0", "no"),
+            ca_bundle=ca_bundle,
         )
 
 
@@ -49,7 +63,8 @@ class RunaiClient:
         self.config = config
         self.timeout = timeout
         self.session = requests.Session()
-        self.session.verify = config.verify_tls
+        # Verify against the configured CA bundle if set; otherwise use certifi (verify_tls).
+        self.session.verify = config.ca_bundle or config.verify_tls
         self._token: str | None = None
 
     def authenticate(self) -> None:
