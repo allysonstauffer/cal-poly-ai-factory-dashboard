@@ -218,3 +218,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Project-specific ---
+# Local credentials: never commit. .env.example (placeholders only) is allowed.
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+
+# Raw API responses may contain usernames, project names, or internal hosts.
+samples/
