@@ -22,16 +22,13 @@ from typing import Any
 # FIELD MAPPING: edit these once real data has been inspected.
 # Each entry is a tuple of candidate paths, tried in order; the first one present
 # on a workload is used. Dots separate nested keys ("allocatedResources.gpu").
-# Names below are from the Run:ai API docs v2.25; the GPU paths are best guesses.
+# Names below are from the Run:ai API docs v2.25 (not yet checked against real data).
 # =============================================================================
 FIELDS: dict[str, tuple[str, ...]] = {
     "phase": ("phase",),
     "type": ("type",),
     "submitter": ("submittedBy",),
-    "requested_gpus": (
-        "workloadRequestedResources.gpu.request",
-        "podsRequestedResources.gpu.request",
-    ),
+    "requested_gpus": ("workloadRequestedResources.gpu.request",),
     "allocated_gpus": ("allocatedResources.gpu",),
 }
 # =============================================================================

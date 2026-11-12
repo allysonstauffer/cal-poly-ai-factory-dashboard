@@ -48,7 +48,22 @@ def test_gpu_fields(capsys):
     _, out, _ = run(capsys, [str(FIXTURE)])
     # Fixture has allocatedResources.gpu (Running: 4 + 1 + 1 = 6) but no requested-GPU field.
     assert "Allocated GPUs (total): 6 (field found on 7/7 workloads)" in out
-    assert "Requested GPUs: field not found" in out
+    assert "Requested GPUs: field not found (tried workloadRequestedResources.gpu.request)\n" in out
+
+
+def test_requested_gpus_from_workload_requested_resources(tmp_path, capsys):
+    workloads = [
+        {"workloadRequestedResources": {"gpu": {"request": 2}}},
+        {"workloadRequestedResources": {"gpu": {"request": 0.5}}},
+        # Per-pod field alone is not counted; there is no fallback.
+        {"podsRequestedResources": {"gpu": {"request": 4}}},
+    ]
+    path = tmp_path / "requested.json"
+    path.write_text(json.dumps(workloads))
+
+    code, out, _ = run(capsys, [str(path)])
+    assert code == 0
+    assert "Requested GPUs (total): 2.50 (field found on 2/3 workloads)" in out
 
 
 def test_no_identifying_values_in_output(capsys):
