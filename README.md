@@ -87,11 +87,54 @@ RUNAI_CA_BUNDLE=C:/path/outside/repo/calpoly-ai-cluster-ca.pem   # optional, Cal
 
 `RUNAI_VERIFY_TLS` should remain `true` once the Run:ai certificate is trusted. Do not put real credentials, bearer tokens, internal IP addresses, or sensitive screenshots in this repository.
 
+### Install
+
+```text
+python -m venv .venv
+.venv\Scripts\activate            # Windows; use source .venv/bin/activate on macOS/Linux
+pip install -r requirements-dev.txt
+```
+
+`requirements.txt` has the runtime dependencies; `requirements-dev.txt` adds pytest.
+
+## Usage
+
+Run from the repository root.
+
+### Fetch workloads
+
+```text
+python src/explore_runai.py [--page-size N] [--max-pages N] [--save]
+```
+
+Logs in, fetches every page of `/api/v1/workloads`, and prints the total, the number of pages fetched, the field names present, and counts by phase and type.
+
+- `--page-size`: workloads per request, 1-500 (default 100)
+- `--max-pages`: safety limit on the number of requests (default 100). The script warns if it stops early
+- `--save`: also write the raw workloads to `samples/workloads_<timestamp>.json`. `samples/` is git-ignored because raw responses contain usernames and project names; never commit or share these files
+
+### Summarize a saved file
+
+```text
+python src/summarize_workloads.py [path/to/workloads.json]
+```
+
+Prints aggregated counts only: total workloads, counts by phase and type, the number of unique submitters (never their names), and total requested and allocated GPUs. Without a path, it reads the newest file in `samples/`. The field names it looks up are in the `FIELDS` mapping at the top of the script; adjust them there once real data has been checked.
+
+### Run the tests
+
+```text
+python -m pytest
+```
+
+The tests use only fake data (`tests/fixtures/workloads_fake.json`) and a fake HTTP layer. They make no network requests and need no `.env`.
+
 ## Project documentation
 
 - [Software Requirements Document](docs/SRD.md) - project requirements, audiences, and open decisions
 - [Data Dictionary](docs/data-dictionary.md) - definitions for retrieved metrics and fields
 - [Architecture Notes](docs/architecture.md) - data sources, API access, and deployment decisions
+- [Progress updates](docs/progress/) - dated status notes
 
 ## Status
 
